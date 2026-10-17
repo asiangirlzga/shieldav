@@ -60,3 +60,13 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: out/ShieldAV.apk
+
+      - name: Publish APK to the "latest" release (main branch)
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view latest >/dev/null 2>&1 || \
+            gh release create latest --target "$GITHUB_SHA" --title "Latest build" \
+              --notes "Latest ShieldAV APK, built automatically from main."
+          gh release upload latest out/ShieldAV.apk --clobber
