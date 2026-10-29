@@ -6,11 +6,13 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import androidx.documentfile.provider.DocumentFile
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import java.io.File
 import java.io.InputStream
+import java.nio.file.Files
 import java.security.MessageDigest
 
 enum class Severity { MALWARE, SUSPICIOUS }
@@ -20,10 +22,9 @@ data class Finding(
     val title: String,
     val detail: String,
     val packageName: String? = null,
-    val fileUri: Uri? = null
-) {
-    override fun toString(): String = "[${severity.name}] $title\n$detail"
-}
+    val fileUri: Uri? = null,
+    val filePath: String? = null
+)
 
 object Hashing {
     data class Digests(val md5: String, val sha256: String)
@@ -79,6 +80,58 @@ object RiskAnalyzer {
 }
 
 class Scanner(private val ctx: Context, private val db: DefinitionDb) {
+
+    /** Root folders of internal storage and any SD card / USB volumes. */
+    fun storageRoots(): List<File> {
+        val roots = linkedSetOf<File>()
+        @Suppress("DEPRECATION")
+        roots += Environment.getExternalStorageDirectory()
+        ctx.getExternalFilesDirs(null).filterNotNull().forEach { f ->
+            val idx = f.absolutePath.indexOf("/Android/")
+            if (idx > 0) roots += File(f.absolutePath.substring(0, idx))
+        }
+        return roots.filter { it.exists() && it.canRead() }
+    }
+
+    /**
+     * Walks real files on shared storage (needs "All files access" on Android 11+).
+     * Does not follow symbolic links, skips unreadable folders and huge files.
+     */
+    suspend fun scanStorage(allTypes: Boolean, onProgress: (String) -> Unit): List<Finding> {
+        val findings = mutableListOf<Finding>()
+        val stack = ArrayDeque<File>()
+        storageRoots().forEach { stack.addLast(it) }
+        var scanned = 0
+        var visited = 0
+
+        while (stack.isNotEmpty()) {
+            currentCoroutineContext().ensureActive()
+            val f = stack.removeLast()
+            if (Files.isSymbolicLink(f.toPath())) continue
+            if (f.isDirectory) {
+                f.listFiles()?.forEach { stack.addLast(it) }
+                continue
+            }
+            visited++
+            if (!allTypes && f.extension.lowercase() !in RISKY_EXTENSIONS) continue
+            if (f.length() > MAX_FILE_BYTES) continue
+
+            scanned++
+            if (scanned % 10 == 0) onProgress("Files scanned: $scanned (checked $visited) \u2022 ${f.name}")
+
+            val d = runCatching { f.inputStream().use { Hashing.digest(it) } }.getOrNull() ?: continue
+            val hit = match(d)
+            if (hit != null) {
+                findings += Finding(
+                    Severity.MALWARE, "${f.name} ($hit)",
+                    "Known malware signature matched.\nPath: ${f.absolutePath}\nSHA-256: ${d.sha256}",
+                    filePath = f.absolutePath
+                )
+            }
+        }
+        onProgress("Files scanned: $scanned (checked $visited)")
+        return findings
+    }
 
     private fun match(d: Hashing.Digests): String? = db.lookup(d.sha256) ?: db.lookup(d.md5)
 

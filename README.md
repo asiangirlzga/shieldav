@@ -2,7 +2,9 @@
 
 A small open-source Android antivirus app (Kotlin).
 
+- **Full device scan**: installed apps + all files on internal storage and SD cards (asks for "All files access").
 - Scans **installed apps** (hashes every APK/split) and **any folder** you pick.
+- Colour-coded alerts: **red** = known malware, **orange** = app to review, **green** = clean, **blue** = info/progress.
 - Matches against a local **hash signature database** (MD5 / SHA-256).
 - Flags risky permission combinations as "review" (heuristic, not a verdict).
 - Updates definitions from the app (button) and automatically every ~24 h on unmetered Wi-Fi.

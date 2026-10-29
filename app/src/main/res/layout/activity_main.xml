@@ -20,11 +20,22 @@
         android:text="Definitions: -" />
 
     <TextView
+        android:id="@+id/tvBanner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:padding="12dp"
+        android:text="Ready to scan"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <TextView
         android:id="@+id/tvStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="Ready" />
+        android:text="" />
 
     <ProgressBar
         android:id="@+id/progress"
@@ -35,28 +46,43 @@
         android:visibility="invisible" />
 
     <Button
-        android:id="@+id/btnUpdate"
+        android:id="@+id/btnFullScan"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Update virus definitions" />
+        android:text="Full device scan (apps + all storage)" />
 
-    <Button
-        android:id="@+id/btnScanApps"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Scan installed apps" />
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/btnScanFolder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Scan a folder" />
+        <Button
+            android:id="@+id/btnScanApps"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Apps" />
+
+        <Button
+            android:id="@+id/btnScanFolder"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Folder" />
+
+        <Button
+            android:id="@+id/btnUpdate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Update" />
+    </LinearLayout>
 
     <CheckBox
         android:id="@+id/cbAll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Folder scan: include all file types (slower)" />
+        android:text="Scan all file types (slower, more thorough)" />
 
     <Button
         android:id="@+id/btnCancel"
@@ -70,6 +96,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
-        android:layout_weight="1" />
+        android:layout_weight="1"
+        android:divider="@null" />
 
 </LinearLayout>

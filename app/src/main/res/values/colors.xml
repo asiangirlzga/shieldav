@@ -1,0 +1,7 @@
+<resources>
+    <color name="sev_malware">#D32F2F</color>
+    <color name="sev_suspicious">#F57C00</color>
+    <color name="sev_safe">#2E7D32</color>
+    <color name="sev_info">#1565C0</color>
+    <color name="white">#FFFFFF</color>
+</resources>

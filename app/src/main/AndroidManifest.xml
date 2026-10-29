@@ -7,10 +7,19 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <!-- Needed to offer "uninstall" for a flagged app -->
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+    <!-- Full device scan: all-files access on Android 11+, classic storage permissions below -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
 
     <application
         android:name=".AvApp"
         android:allowBackup="false"
+        android:requestLegacyExternalStorage="true"
         android:icon="@drawable/ic_shield"
         android:label="@string/app_name"
         android:supportsRtl="true"
